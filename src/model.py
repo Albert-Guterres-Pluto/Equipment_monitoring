@@ -42,31 +42,50 @@ raw_df = pd.concat(raw_list, ignore_index=True)
 raw_df['time'] = pd.to_datetime(raw_df['time'])
 
 # -------------------- 未来维护计划生成 --------------------
-def get_future_schedule(device, start, years_ahead=40):
-    """根据历史维护间隔生成未来维护日期，最多 look_ahead 年"""
+def get_future_schedule(device, start, years_ahead=20):
+    """
+    根据历史维护记录生成从 start 起 future 年的维护日期。
+    - 中维护：取历史间隔中位数，若无历史则默认120天。
+    - 大维护：若历史有2次及以上，取中位数间隔；若仅1次，默认365天；
+      若历史无大维护，则不生成任何大维护计划。
+    """
     dev_maint = maint_raw[maint_raw['device'] == device]
     med_dates = sorted(dev_maint[dev_maint['type'] == 'medium']['date'])
     large_dates = sorted(dev_maint[dev_maint['type'] == 'large']['date'])
 
-    med_int = np.median([(med_dates[i+1] - med_dates[i]).days for i in range(len(med_dates)-1)]) if len(med_dates) >= 2 else 120
-    large_int = np.median([(large_dates[i+1] - large_dates[i]).days for i in range(len(large_dates)-1)]) if len(large_dates) >= 2 else 365
+    # 计算中维护间隔
+    if len(med_dates) >= 2:
+        med_int = np.median([(med_dates[i+1] - med_dates[i]).days for i in range(len(med_dates)-1)])
+    else:
+        med_int = 120
+
+    # 计算大维护间隔
+    if len(large_dates) >= 2:
+        large_int = np.median([(large_dates[i+1] - large_dates[i]).days for i in range(len(large_dates)-1)])
+    elif len(large_dates) == 1:
+        large_int = 365          # 只有一次记录，无法统计，保守假设一年一次
+    else:
+        large_int = None         # 无历史大维护，后续不安排
 
     end_date = start + pd.DateOffset(years=years_ahead)
     schedule = []
-    # 中维护：从最后一个已知维护向后生成
+
+    # 中维护生成
     last_med = med_dates[-1] if med_dates else start - pd.DateOffset(days=med_int)
     d = last_med + pd.DateOffset(days=med_int)
     while d <= end_date:
         if d >= start:
             schedule.append({'date': d, 'type': 'medium'})
         d += pd.DateOffset(days=med_int)
-    # 大维护
-    last_large = large_dates[-1] if large_dates else start - pd.DateOffset(days=large_int)
-    d = last_large + pd.DateOffset(days=large_int)
-    while d <= end_date:
-        if d >= start:
-            schedule.append({'date': d, 'type': 'large'})
-        d += pd.DateOffset(days=large_int)
+
+    # 大维护生成（仅当有历史间隔时）
+    if large_int is not None:
+        last_large = large_dates[-1] if large_dates else start - pd.DateOffset(days=large_int)
+        d = last_large + pd.DateOffset(days=large_int)
+        while d <= end_date:
+            if d >= start:
+                schedule.append({'date': d, 'type': 'large'})
+            d += pd.DateOffset(days=large_int)
 
     return pd.DataFrame(schedule) if schedule else pd.DataFrame()
 

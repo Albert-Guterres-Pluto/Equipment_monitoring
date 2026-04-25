@@ -8,35 +8,40 @@
 
 ## 项目结构
 ```
-EQUIPMENT_MONITORING/          # 项目根目录（可自由命名）
-├── config.py                  # 全局路径与参数（自动基于项目根目录）
-├── main.py                    # 一键运行所有模块
+EQUIPMENT_MONITORING/ # 项目根目录（可自由命名）
+│
+├── config.py # 全局路径与参数（自动基于项目根目录）
+├── main.py # 一键运行所有模块
+│
 ├── data/
-│   ├── raw/                   # 原始附件1.xlsx、附件2.xlsx
-│   │   ├── 附件1.xlsx
-│   │   └── 附件2.xlsx
-│   └── processed/             # 清洗后日频数据
-│       └── cleaned_data.csv
+│ ├── raw/ # 原始附件1.xlsx、附件2.xlsx
+│ │ ├── 附件1.xlsx
+│ │ └── 附件2.xlsx
+│ └── processed/ # 清洗后日频数据
+│ └── cleaned_data.csv
+│
 ├── src/
-│   ├── preprocess.py          # 数据预处理（前向填充、维护标记）
-│   ├── analysis.py            # 第一问：衰减率、季节效应、维护增益
-│   ├── model.py               # 第二问：寿命预测模型
-│   └── optimize.py            # 第三问、第四问：维护优化与敏感性分析
+│ ├── preprocess.py # 数据预处理（前向填充、维护标记）
+│ ├── analysis.py # 第一问：衰减率、季节效应、维护增益
+│ ├── model.py # 第二问：寿命预测模型
+│ └── optimize.py # 第三、四问：维护优化与敏感性分析
+│
 ├── utils/
-│   └── plot.py                # 论文图表生成
+│ └── plot.py # 论文图表生成
+│
 └── results/
-    ├── figures/               # 5张论文用图
-    │   ├── time_series_A1.png
-    │   ├── seasonal.png
-    │   ├── life_decay.png
-    │   ├── optimal_thresholds.png
-    │   └── sensitivity_heatmap.png
-    ├── decay_rates.csv        # 各设备自然衰减率
-    ├── indicators.csv         # 第一问关键指标汇总
-    ├── life_predictions_final.csv  # 第二问寿命预测结果
-    ├── optimal_maintenance.csv    # 第三问最优维护方案
-    ├── seasonal_effect.csv    # 季节效应（月均偏离）
-    └── sensitivity_analysis.csv   # 第四问成本波动敏感性
+├── figures/ # 5张论文用图
+│ ├── time_series_A1.png
+│ ├── seasonal.png
+│ ├── life_decay.png
+│ ├── optimal_thresholds.png
+│ └── sensitivity_heatmap.png
+├── decay_rates.csv
+├── indicators.csv
+├── life_predictions_final.csv
+├── optimal_maintenance.csv
+├── seasonal_effect.csv
+└── sensitivity_analysis.csv
 ```
 
 ## 环境配置（队友必读）
